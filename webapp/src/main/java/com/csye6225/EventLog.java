@@ -63,50 +63,23 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
             initDynamoDbClient();
             long ttlDbValue = 0;
             context.getLogger().log("hey111 " + timeStamp);
-            Item item = this.dynamoDb.getTable(tableName).getItem("UserId_DevTwo", username);
-            if (item != null) {
-                context.getLogger().log("Checking for timestamp");
+            if (this.dynamoDb.getTable(tableName).describe().getItemCount() > 0) {
+                Item item = this.dynamoDb.getTable(tableName).getItem("UserId_DevTwo", username);
+                context.getLogger().log("hey2 " + timeStamp);
                 ttlDbValue = item.getLong("ttl");
-            }
 
-            if (item == null || (ttlDbValue < now && ttlDbValue != 0)) {
-                context.getLogger().log("Checking for valid ttl");
-                context.getLogger().log("ttl expired, creating new token and sending email");
-                this.dynamoDb.getTable(tableName)
-                        .putItem(
-                                new PutItemSpec().withItem(new Item()
-                                        .withString("id", username)
-                                        .withString("token", token)
-                                        .withLong("ttl", totalttl)));
-
-                for (String recipe : myList) {
-                    body = body + "<p>" + recipe + "</p>";
+                context.getLogger().log("ttldbvalue: " + ttlDbValue);
+                context.getLogger().log("now: " + now);
+                if (ttlDbValue < now && ttlDbValue != 0) {
+                    context.getLogger().log("inside if: " );
+                    emailSender(context);
+                } else {
+                    context.getLogger().log("ttl is not expired. New request is not processed for the user: " + username);
                 }
-                htmlBody = "<h2>Email sent from Amazon SES</h2>"
-                        + body;
-                context.getLogger().log("This is HTML body: " + htmlBody);
-
-
-                //Sending email using Amazon SES client
-                AmazonSimpleEmailService clients = AmazonSimpleEmailServiceClientBuilder.standard()
-                        .withRegion(region).build();
-                SendEmailRequest emailRequest = new SendEmailRequest()
-                        .withDestination(
-                                new Destination().withToAddresses(username))
-                        .withMessage(new Message()
-                                .withBody(new Body()
-                                        .withHtml(new Content()
-                                                .withCharset("UTF-8").withData(htmlBody))
-                                        .withText(new Content()
-                                                .withCharset("UTF-8").withData(textBody)))
-                                .withSubject(new Content()
-                                        .withCharset("UTF-8").withData(subject)))
-                        .withSource(from);
-                clients.sendEmail(emailRequest);
-                context.getLogger().log("Email sent successfully to email id: " +username);
-
-            } else {
-                context.getLogger().log("ttl is not expired. New request is not processed for the user: " +username);
+            }
+            else{
+                context.getLogger().log("inside else");
+                emailSender(context);
             }
         } catch (Exception ex) {
             context.getLogger().log("Email was not sent. Error message: " + ex.getMessage());
@@ -114,7 +87,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
         return null;
     }
 
-    /*private void emailSender(Context context) {
+    private void emailSender(Context context) {
         context.getLogger().log("Checking for valid ttl");
         context.getLogger().log("ttl expired, creating new token and sending email");
         this.dynamoDb.getTable(tableName)
@@ -149,7 +122,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
         clients.sendEmail(emailRequest);
         context.getLogger().log("Email sent successfully to email id: " + username);
 
-    }*/
+    }
 
     //creating a DynamoDB Client
     private void initDynamoDbClient() {
