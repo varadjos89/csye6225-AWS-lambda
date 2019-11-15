@@ -8,20 +8,14 @@ jobs:
       - run:
           name: Build Artifact
           command: |
-            cd demo
+            cd webapp
             pwd
             mvn clean install
-            echo "1" 
             mvn package -DskipTests
-            echo "2" 
             cd target
-            echo "3" 
             ls -al
-            echo "4" 
             cd ..
-            echo "5" 
             pwd
-            echo "7" 
       - run:
           name: Zip Artifact
           command: |
@@ -31,7 +25,7 @@ jobs:
             mkdir -p lambda_artifact
             pwd
             ls -al
-            mv demo/target/Webapp-1.0-SNAPSHOT.jar lambda_artifact/
+            mv webapp/target/webapp-1.0-SNAPSHOT.jar lambda_artifact/
             ls -al
             cd lambda_artifact
             ls -al
@@ -69,11 +63,11 @@ jobs:
           name: Upload Lambda Artifact to S3
           command: |
             cd lambda_artifact
-            aws s3 cp Webapp-1.0-SNAPSHOT.jar s3://${bucketName}
+            aws s3 cp webapp-1.0-SNAPSHOT.jar s3://${bucketName}
       - run:
           name: AWS Lambda Update Function Code
           command: |
             echo "Hello AWS Lambda Update Function Code"
             aws lambda update-function-code --function-name csye6225_fall2019 --region ${AWS_REGION} \
-            --zip-file fileb://./lambda_artifact/Webapp-1.0-SNAPSHOT.jar
+            --zip-file fileb://./lambda_artifact/webapp-1.0-SNAPSHOT.jar
             echo "code deployment complete"
