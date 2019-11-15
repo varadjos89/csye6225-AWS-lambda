@@ -64,7 +64,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
             long ttlDbValue = 0;
             context.getLogger().log("hey1 " + timeStamp);
             if (this.dynamoDb.getTable(tableName).describe().getItemCount() != 0) {
-                Item item = this.dynamoDb.getTable(tableName).getItem("id", username);
+                Item item = this.dynamoDb.getTable(tableName).getItem("UserId_DevTwo", username);
                 context.getLogger().log("hey2 " + timeStamp);
                 ttlDbValue = item.getLong("ttl");
 
@@ -89,7 +89,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
         this.dynamoDb.getTable(tableName)
                 .putItem(
                         new PutItemSpec().withItem(new Item()
-                                .withString("id", username)
+                                .withString("UserId_DevTwo", username)
                                 .withString("token", token)
                                 .withLong("ttl", totalttl)));
 
