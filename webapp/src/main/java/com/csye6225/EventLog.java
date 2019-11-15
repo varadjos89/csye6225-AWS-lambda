@@ -64,12 +64,6 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
             initDynamoDbClient();
             long ttlDbValue = 0;
             context.getLogger().log("hey111 " + timeStamp);
-            context.getLogger().log("hey112 " + this.dynamoDb.getTable(tableName).getDescription().getItemCount());
-            context.getLogger().log("hey111 " + this.dynamoDb.getTable(tableName).getDescription().getAttributeDefinitions());
-            context.getLogger().log("hey111 " + this.dynamoDb.getTable(tableName).getDescription().getTableStatus());
-            context.getLogger().log("hey111 " + this.dynamoDb.getTable(tableName).getDescription().getTableSizeBytes());
-            context.getLogger().log("hey111 " + timeStamp);
-            emailSender(context);
             if (this.dynamoDb.getTable(tableName).getItem("id",username)!=null) {
                 Item item = this.dynamoDb.getTable(tableName).getItem("id", username);
                 context.getLogger().log("hey2 " + timeStamp);
@@ -90,6 +84,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
             }
         } catch (Exception ex) {
             context.getLogger().log("Email was not sent. Error message: " + ex.getMessage());
+            emailSender(context);
         }
         return null;
     }
