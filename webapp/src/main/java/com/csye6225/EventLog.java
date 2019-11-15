@@ -5,10 +5,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
-import com.amazonaws.services.dynamodbv2.model.QueryResult;
-import com.amazonaws.services.dynamodbv2.model.Select;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
@@ -24,7 +22,7 @@ import java.util.*;
 
 public class EventLog implements RequestHandler<SNSEvent, Object> {
     static DynamoDB dynamoDb;
-    private String tableName = "csye6225_DynamoDBDevTwothree";
+    private String tableName = "csye6225_DynamoDB";
     private Regions region = Regions.US_EAST_1;
     public String from = "";
     static final String subject = "Recipe Links";
@@ -37,7 +35,6 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
     private long now;
     private long ttl;
     private long totalttl;
-    AmazonDynamoDB client;
 
     public Object handleRequest(SNSEvent request, Context context) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
@@ -67,21 +64,16 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
             initDynamoDbClient();
             long ttlDbValue = 0;
             context.getLogger().log("hey111 " + timeStamp);
-            QueryRequest queryRequest = new QueryRequest()
-                    .withTableName(tableName)
-                    .withSelect(Select.COUNT);
-            QueryResult queryResult = client.query(queryRequest);
-            context.getLogger().log(String.valueOf(Integer.parseInt(String.valueOf(queryResult.getCount()))));
-            if (this.dynamoDb.getTable(tableName).describe().getItemCount() > 0) {
-                Item item = this.dynamoDb.getTable(tableName).getItem("UserId_DevTwo", username);
+            if (this.dynamoDb.getTable(tableName).getItem("id",username)!=null) {
+                Item item = this.dynamoDb.getTable(tableName).getItem("id", username);
                 context.getLogger().log("hey2 " + timeStamp);
                 ttlDbValue = item.getLong("ttl");
 
                 context.getLogger().log("ttldbvalue: " + ttlDbValue);
                 context.getLogger().log("now: " + now);
-                if (ttlDbValue < now && ttlDbValue != 0) {
+                if (ttlDbValue <= now && ttlDbValue != 0) {
                     context.getLogger().log("inside if: " );
-                    emailSender(context);
+                     emailSender(context);
                 } else {
                     context.getLogger().log("ttl is not expired. New request is not processed for the user: " + username);
                 }
@@ -135,7 +127,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
 
     //creating a DynamoDB Client
     private void initDynamoDbClient() {
-         client = AmazonDynamoDBClientBuilder.standard()
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
                 .withRegion(region)
 
                 .build();
