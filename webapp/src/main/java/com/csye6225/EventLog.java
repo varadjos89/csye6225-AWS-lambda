@@ -107,7 +107,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
                 .withDestination(
                         new Destination().withToAddresses(username))
                 .withMessage(new Message()
-                        .withBoprivatedy(new Body()
+                        .withBody(new Body()
                                 .withHtml(new Content()
                                         .withCharset("UTF-8").withData(htmlBody))
                                 .withText(new Content()
