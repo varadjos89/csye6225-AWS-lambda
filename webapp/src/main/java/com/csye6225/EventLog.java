@@ -33,6 +33,14 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
     List<String> myList;
 
     public Object handleRequest(SNSEvent request, Context context) {
-        
+
+        //creating a DynamoDB Client
+        private void initDynamoDbClient() {
+            AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
+                    .withRegion(region)
+
+                    .build();
+            dynamoDb = new DynamoDB(client);
+        }
     }
 }
