@@ -95,7 +95,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
         this.dynamoDb.getTable(tableName)
                 .putItem(
                         new PutItemSpec().withItem(new Item()
-                                .withString("UserId_DevTwo", username)
+                                .withString("id", username)
                                 .withString("token", token)
                                 .withLong("ttl", totalttl)));
 
