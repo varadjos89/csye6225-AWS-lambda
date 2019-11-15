@@ -63,6 +63,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
             initDynamoDbClient();
             long ttlDbValue = 0;
             context.getLogger().log("hey111 " + timeStamp);
+            context.getLogger().log(this.dynamoDb.getTable(tableName).describe().getItemCount()+"");
             if (this.dynamoDb.getTable(tableName).describe().getItemCount() > 0) {
                 Item item = this.dynamoDb.getTable(tableName).getItem("UserId_DevTwo", username);
                 context.getLogger().log("hey2 " + timeStamp);
