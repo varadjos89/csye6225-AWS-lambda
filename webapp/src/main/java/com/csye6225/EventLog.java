@@ -101,6 +101,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
 
         for (String recipe : myList) {
             body = body + "<p>" + recipe + "</p>";
+            context.getLogger().log(recipe);
         }
         htmlBody = "<h2>Email sent from Amazon SES</h2>"
                 + body;
