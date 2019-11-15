@@ -6,6 +6,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.model.Select;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
@@ -34,6 +37,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
     private long now;
     private long ttl;
     private long totalttl;
+    AmazonDynamoDB client;
 
     public Object handleRequest(SNSEvent request, Context context) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
@@ -63,7 +67,11 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
             initDynamoDbClient();
             long ttlDbValue = 0;
             context.getLogger().log("hey111 " + timeStamp);
-            context.getLogger().log(this.dynamoDb.getTable(tableName).describe().getItemCount()+"");
+            QueryRequest queryRequest = new QueryRequest()
+                    .withTableName(tableName)
+                    .withSelect(Select.COUNT);
+            QueryResult queryResult = client.query(queryRequest);
+            context.getLogger().log(String.valueOf(Integer.parseInt(String.valueOf(queryResult.getCount()))));
             if (this.dynamoDb.getTable(tableName).describe().getItemCount() > 0) {
                 Item item = this.dynamoDb.getTable(tableName).getItem("UserId_DevTwo", username);
                 context.getLogger().log("hey2 " + timeStamp);
@@ -127,7 +135,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
 
     //creating a DynamoDB Client
     private void initDynamoDbClient() {
-        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
+         client = AmazonDynamoDBClientBuilder.standard()
                 .withRegion(region)
 
                 .build();
