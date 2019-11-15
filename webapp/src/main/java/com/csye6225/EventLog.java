@@ -26,7 +26,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
     public String from = "";
     static final String subject = "Recipe Links";
     static String htmlBody;
-    private static String textBody;
+    private static String textBody="abc";
     private String body = "";
     static String token;
     static String username;
