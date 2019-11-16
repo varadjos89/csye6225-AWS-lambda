@@ -124,6 +124,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
                 .withSource(from);
         clients.sendEmail(emailRequest);
         context.getLogger().log("Email sent successfully to email id: " + username);
+        body=null;
 
     }
 
