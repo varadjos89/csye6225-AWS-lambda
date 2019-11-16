@@ -39,11 +39,11 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
     public Object handleRequest(SNSEvent request, Context context) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
         String Domain = "prod.varadjoshi89.xyz";
-        context.getLogger().log("domain" + Domain);
+        context.getLogger().log("domain :" + Domain);
         from = "noreply@" + Domain;
 
         //Creating ttl
-        context.getLogger().log("Invocation started: " + timeStamp);
+        context.getLogger().log("Invocation started : " + timeStamp);
         now = Calendar.getInstance().getTimeInMillis() / 1000; // unix time
         ttl = 60 * 30; // ttl set to 30 min
         totalttl = ttl + now;
@@ -58,21 +58,19 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
         }
 
         token = UUID.randomUUID().toString();
-        context.getLogger().log("Invocation completed: " + timeStamp);
+        context.getLogger().log("Invocation completed : " + timeStamp);
 
         try {
             initDynamoDbClient();
             long ttlDbValue = 0;
-            context.getLogger().log("hey111 " + timeStamp);
+            context.getLogger().log("Current timestamp " + timeStamp);
             if (this.dynamoDb.getTable(tableName).getItem("id",username)!=null) {
                 Item item = this.dynamoDb.getTable(tableName).getItem("id", username);
-                context.getLogger().log("hey2 " + timeStamp);
                 ttlDbValue = item.getLong("ttl");
 
-                context.getLogger().log("ttldbvalue: " + ttlDbValue);
-                context.getLogger().log("now: " + now);
+                context.getLogger().log("ttldbvalue : " + ttlDbValue);
+                context.getLogger().log("current ttl value : " + now);
                 if (ttlDbValue <= now && ttlDbValue != 0) {
-                    context.getLogger().log("inside if: " );
                      emailSender(context);
                 } else {
                     context.getLogger().log("ttl is not expired. New request is not processed for the user: " + username);
