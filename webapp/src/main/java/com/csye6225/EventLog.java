@@ -38,14 +38,14 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
 
     public Object handleRequest(SNSEvent request, Context context) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
-        String Domain = "prod.varadjoshi89.xyz";
+        String Domain = System.getenv("domain_name");
         context.getLogger().log("Domain name is :" + Domain);
         from = "noreply@" + Domain;
 
         //Creating ttl
         context.getLogger().log("Invocation started : " + timeStamp);
         now = Calendar.getInstance().getTimeInMillis() / 1000; // unix time
-        ttl = 60 * 30; // ttl set to 30 min
+        ttl = 60 * Integer.parseInt(System.getenv("ttl")); // ttl set to 30 min
         totalttl = ttl + now;
 
         try {
