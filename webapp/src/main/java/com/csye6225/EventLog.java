@@ -39,7 +39,7 @@ public class EventLog implements RequestHandler<SNSEvent, Object> {
     public Object handleRequest(SNSEvent request, Context context) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
         String Domain = "prod.varadjoshi89.xyz";
-        context.getLogger().log("domain :" + Domain);
+        context.getLogger().log("Domain name is :" + Domain);
         from = "noreply@" + Domain;
 
         //Creating ttl
