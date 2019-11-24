@@ -1,0 +1,73 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: Build Artifact
+          command: |
+            cd webapp
+            pwd
+            mvn clean install
+            mvn package -DskipTests
+            cd target
+            ls -al
+            cd ..
+            pwd
+      - run:
+          name: Zip Artifact
+          command: |
+            echo "Hello the current build number is ${CIRCLE_BUILD_NUM}"
+            pwd
+            ls -al
+            mkdir -p lambda_artifact
+            pwd
+            ls -al
+            mv webapp/target/webapp-1.0-SNAPSHOT.jar lambda_artifact/
+            ls -al
+            cd lambda_artifact
+            ls -al
+            pwd
+            cd ..
+            pwd
+            ls -al
+      - run:
+          name: Install AWS CLI & Build Artifact
+          command: |
+            sudo apt-get update || sudo apt-get update
+            sudo apt-get install python3
+            python3 --version
+            sudo apt install python3-pip
+            pip3 --version
+            sudo pip3 install awscli
+      - run:
+          name: Configure AWS Access Key ID
+          command: |
+            aws configure set aws_access_key_id \
+            ${AWS_ACCESS_KEY} \
+            --profile default
+      - run:
+          name: Configure AWS Secret Access Key
+          command: |
+            aws configure set aws_secret_access_key \
+            ${AWS_SECRET_KEY} \
+            --profile default
+      - run:
+          name: Configure AWS region
+          command: |
+            aws configure set region ${AWS_REGION} \
+            --profile default
+      - run:
+          name: Upload Lambda Artifact to S3
+          command: |
+            cd lambda_artifact
+            aws s3 cp webapp-1.0-SNAPSHOT.jar s3://${bucketName}
+      - run:
+          name: AWS Lambda Update Function Code
+          command: |
+            echo "Hello AWS Lambda Update Function Code"
+            aws lambda update-function-code --function-name csye6225_fall2019 --region ${AWS_REGION} \
+            --zip-file fileb://./lambda_artifact/webapp-1.0-SNAPSHOT.jar
+            echo "code deployment complete"
